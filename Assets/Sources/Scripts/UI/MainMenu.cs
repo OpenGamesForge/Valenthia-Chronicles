@@ -66,11 +66,7 @@ namespace Scripts.UI
         
         public void QuitGame()
         {
-            #if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
-            #else
-                Application.Quit();
-            #endif
+            _ = GameManager.Instance.GameShutdown();
         }
         
         public void DisplaySettings()

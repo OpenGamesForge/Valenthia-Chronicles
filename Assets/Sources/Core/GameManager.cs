@@ -17,7 +17,7 @@ namespace Core
         public event Action OnGameInitialized;
         public event Action OnGameShutdown;
         
-        private List<IGameService> _services = new List<IGameService>();
+        private readonly List<IGameService> _services = new List<IGameService>();
         private bool _isInitialized = false;
         
         private async void Start()
@@ -29,17 +29,12 @@ namespace Core
             catch (Exception exc)
             {
                 Debug.LogError($"Critical error during GameManager initialization: {exc.Message}\nStack trace: {exc.StackTrace}");
-            #if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
-            #else
-                Application.Quit();
-            #endif
+                #if UNITY_EDITOR
+                    UnityEditor.EditorApplication.isPlaying = false;
+                #else
+                    Application.Quit();
+                #endif
             }
-        }
-
-        private void OnApplicationQuit()
-        {
-            ShutdownGame().Forget();
         }
 
         private async UniTask InitializeGame()
@@ -79,7 +74,7 @@ namespace Core
             // _services.Add(audioService);
         //}
 
-        private async UniTaskVoid ShutdownGame()
+        public async UniTask GameShutdown()
         {
             try
             {
@@ -88,15 +83,25 @@ namespace Core
                 // Shutdown all services in reverse order of their initialization
                 for (int i = _services.Count - 1; i >= 0; i--)
                 {
+                    Debug.Log($"Shutting down service: {_services[i].GetType().Name}");
                     await _services[i].Shutdown();
                 }
                 
                 _services.Clear();
                 _isInitialized = false;
+                
+                Debug.Log("All services shut down successfully.");
+                
+                #if UNITY_EDITOR
+                    UnityEditor.EditorApplication.isPlaying = false;
+                #else
+                    Application.Quit();
+                #endif
             }
             catch (Exception e)
             {
                 Debug.LogError($"Error during game shutdown: {e.Message}");
+                throw; // Re-throw to allow proper error handling by the caller
             }
         }
 
