@@ -7,7 +7,7 @@ using System;
 using UnityEngine;
 
 // TODO: Add documentation to know when use each singleton type
-namespace Common.Utils
+namespace Common
 {
     // Credit: https://awesometuts.com/blog/singletons-unity/#elementor-toc__heading-anchor-0
     // Performance tests: init -> 1us, access -> 49ns

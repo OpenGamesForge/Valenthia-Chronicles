@@ -8,95 +8,98 @@
 using System;
 using System.Diagnostics;
 
-/// <summary>
-/// Simple benchmark class to measure average time consumption of code.
-/// </summary>
-public static class Benchmark
+namespace Common
 {
     /// <summary>
-    /// A benchmark's time result.
-    /// Use ToString() to display it.
+    /// Simple benchmark class to measure average time consumption of code.
     /// </summary>
-    public readonly struct Result
+    public static class Benchmark
     {
-        private static readonly string[] units = new string[] { "s", "ms", "µs", "ns" };
-
-        private readonly long elapsedMilliseconds;
-        private readonly long iterationCount;
-        public float elapsedSeconds
+        /// <summary>
+        /// A benchmark's time result.
+        /// Use ToString() to display it.
+        /// </summary>
+        public readonly struct Result
         {
-            get { return ((float)elapsedMilliseconds) / (iterationCount * 1000); }
-        }
+            private static readonly string[] units = new string[] { "s", "ms", "µs", "ns" };
 
-        public Result(long elapsedMilliseconds, long iterationCount)
-        {
-            this.elapsedMilliseconds = elapsedMilliseconds;
-            this.iterationCount = iterationCount;
-        }
-
-        public float CompareTo(Result other)
-        {
-            var elapsed = elapsedSeconds;
-            var otherElapsed = other.elapsedSeconds;
-            return elapsed / otherElapsed;
-        }
-
-        public override string ToString()
-        {
-            var elapsedTime = elapsedSeconds;
-
-            var order = 0;
-            while (elapsedTime < 1 && order < units.Length - 1)
+            private readonly long elapsedMilliseconds;
+            private readonly long iterationCount;
+            public float elapsedSeconds
             {
-                elapsedTime *= 1000;
-                order++;
+                get { return ((float)elapsedMilliseconds) / (iterationCount * 1000); }
             }
-            return elapsedTime + units[order];
+
+            public Result(long elapsedMilliseconds, long iterationCount)
+            {
+                this.elapsedMilliseconds = elapsedMilliseconds;
+                this.iterationCount = iterationCount;
+            }
+
+            public float CompareTo(Result other)
+            {
+                var elapsed = elapsedSeconds;
+                var otherElapsed = other.elapsedSeconds;
+                return elapsed / otherElapsed;
+            }
+
+            public override string ToString()
+            {
+                var elapsedTime = elapsedSeconds;
+
+                var order = 0;
+                while (elapsedTime < 1 && order < units.Length - 1)
+                {
+                    elapsedTime *= 1000;
+                    order++;
+                }
+                return elapsedTime + units[order];
+            }
         }
-    }
 
-    public const long OneMillion = 1000000;
-    public const long TenMillion = 10000000;
-    public const long HundredMillion = 100000000;
+        public const long OneMillion = 1000000;
+        public const long TenMillion = 10000000;
+        public const long HundredMillion = 100000000;
 
-    /// <summary>
-    /// Returns the time it took on average to perform action.
-    /// </summary>
-    /// <param name="action">The action to benchmark.</param>
-    /// <param name="iterationCount">The amount of times to perform the action.</param>
-    /// <returns>The time it took on average to perform action.</returns>
-    public static Result Run(Action action, long iterationCount = TenMillion)
-    {
-        var stopwatch = new Stopwatch();
-
-        stopwatch.Start();
-        for (var l = 0L; l < iterationCount; l++)
+        /// <summary>
+        /// Returns the time it took on average to perform action.
+        /// </summary>
+        /// <param name="action">The action to benchmark.</param>
+        /// <param name="iterationCount">The amount of times to perform the action.</param>
+        /// <returns>The time it took on average to perform action.</returns>
+        public static Result Run(Action action, long iterationCount = TenMillion)
         {
-            action();
-        }
-        stopwatch.Stop();
-        return new Result(stopwatch.ElapsedMilliseconds, iterationCount);
-    }
+            var stopwatch = new Stopwatch();
 
-    /// <summary>
-    /// Returns the time it took on average to perform action. Allows an action to be performed each time without being measured.
-    /// </summary>
-    /// <param name="action">The action to benchmark.</param>
-    /// <param name="actionBefore">The action to be performed before each cycle without being measured.</param>
-    /// <param name="iterationCount">The amount of times to perform the action.</param>
-    /// <returns>The time it took on average to perform action.</returns>
-    public static Result Run(Action action, Action actionBefore, long iterationCount = TenMillion)
-    {
-        var stopwatch = new Stopwatch();
-
-        for (var l = 0L; l < iterationCount; l++)
-        {
-            actionBefore();
             stopwatch.Start();
-            action();
+            for (var l = 0L; l < iterationCount; l++)
+            {
+                action();
+            }
             stopwatch.Stop();
+            return new Result(stopwatch.ElapsedMilliseconds, iterationCount);
         }
-        return new Result(stopwatch.ElapsedMilliseconds, iterationCount);
+
+        /// <summary>
+        /// Returns the time it took on average to perform action. Allows an action to be performed each time without being measured.
+        /// </summary>
+        /// <param name="action">The action to benchmark.</param>
+        /// <param name="actionBefore">The action to be performed before each cycle without being measured.</param>
+        /// <param name="iterationCount">The amount of times to perform the action.</param>
+        /// <returns>The time it took on average to perform action.</returns>
+        public static Result Run(Action action, Action actionBefore, long iterationCount = TenMillion)
+        {
+            var stopwatch = new Stopwatch();
+
+            for (var l = 0L; l < iterationCount; l++)
+            {
+                actionBefore();
+                stopwatch.Start();
+                action();
+                stopwatch.Stop();
+            }
+            return new Result(stopwatch.ElapsedMilliseconds, iterationCount);
+        }
     }
 }
 
