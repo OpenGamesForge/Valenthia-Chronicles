@@ -51,6 +51,8 @@ namespace Core
                 operation.allowSceneActivation = true;
                 await operation;
                 
+                await InitializeServices();
+                
                 await Awaitable.WaitForSecondsAsync(5f);
                 
                 // Notify that initialization is complete
@@ -65,14 +67,11 @@ namespace Core
             }
         }
 
-        //private void InitializeServices()
-        //{
-            // TODO: Add future services initialization here
-            // Example:
-            // var audioService = AudioService.Instance;
-            // await audioService.Initialize();
-            // _services.Add(audioService);
-        //}
+        private async UniTask InitializeServices()
+        {
+            await GameSession.Instance.Initialize();
+            _services.Add(GameSession.Instance);
+        }
 
         public async UniTask GameShutdown()
         {
