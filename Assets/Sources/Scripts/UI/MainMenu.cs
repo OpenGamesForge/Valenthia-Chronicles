@@ -6,7 +6,6 @@
 using Core;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 
 namespace Scripts.UI
@@ -14,6 +13,7 @@ namespace Scripts.UI
     public class MainMenu : MonoBehaviour
     {
         [SerializeField] private float fadeInDuration = 1f;
+        
         private CanvasGroup _canvasGroup;
 
         private void Awake()
@@ -22,18 +22,18 @@ namespace Scripts.UI
             if (_canvasGroup == null)
             {
                 Debug.LogError("CanvasGroup component is missing on MainMenu object!");
-                return;
+                _ = GameManager.Instance.GameShutdown();
             }
         }
 
         private void Start()
         {
-            if (_canvasGroup != null)
-            {
-                _canvasGroup.alpha = 0;
-                _canvasGroup.interactable = false;
-                _canvasGroup.blocksRaycasts = false;
-            }
+            if (!_canvasGroup)
+                return;
+            
+            _canvasGroup.alpha = 0;
+            _canvasGroup.interactable = false;
+            _canvasGroup.blocksRaycasts = false;
 
             GameManager.Instance.OnGameInitialized += OnGameManagerInitialized;
         }
@@ -60,8 +60,7 @@ namespace Scripts.UI
         
         public void PlayGame()
         {
-            SceneManager.LoadScene("SC_DevMap", LoadSceneMode.Additive);
-            SceneManager.UnloadSceneAsync("SC_MainMenu");
+            _ = GameSession.Instance.NewGame();
         }
         
         public void QuitGame()
