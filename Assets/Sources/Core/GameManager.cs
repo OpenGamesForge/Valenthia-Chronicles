@@ -18,7 +18,7 @@ namespace Core
         public event Action OnGameShutdown;
         
         private readonly List<IGameService> _services = new List<IGameService>();
-        private bool _isInitialized = false;
+        private bool _isInitialized;
         
         private async void Start()
         {
@@ -29,11 +29,8 @@ namespace Core
             catch (Exception exc)
             {
                 Debug.LogError($"Critical error during GameManager initialization: {exc.Message}\nStack trace: {exc.StackTrace}");
-                #if UNITY_EDITOR
-                    UnityEditor.EditorApplication.isPlaying = false;
-                #else
-                    Application.Quit();
-                #endif
+                
+                QuitGame();
             }
         }
 
@@ -91,17 +88,22 @@ namespace Core
                 
                 Debug.Log("All services shut down successfully.");
                 
-                #if UNITY_EDITOR
-                    UnityEditor.EditorApplication.isPlaying = false;
-                #else
-                    Application.Quit();
-                #endif
+                QuitGame();
             }
             catch (Exception e)
             {
                 Debug.LogError($"Error during game shutdown: {e.Message}");
                 throw; // Re-throw to allow proper error handling by the caller
             }
+        }
+        
+        private void QuitGame()
+        {
+            #if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+            #else
+                Application.Quit();
+            #endif
         }
 
         public bool IsInitialized => _isInitialized;
